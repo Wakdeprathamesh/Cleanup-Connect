@@ -46,42 +46,156 @@
                         </div>
                     </div>
                 </div>                
-                <div class="profile-info">
-                    <h1>User Name</h1>
-                    <p><strong>Location:</strong> City, Country</p>
-                    <p><strong>Email:</strong> user@example.com</p>
-                    <p><strong>Phone:</strong> +1234567890</p>
-                    <p><strong>Bio:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget ante vel ex scelerisque vulputate.</p>
-                </div>
-                <div class="badges-section">
-                  <h2>Badges</h2>
-                  <!-- Add badges here -->
+                <div class="profile-info" id="profile_data">
+                  <h1 id="user_val"></h1>
+                  <p id="location_val"><strong>Location:</strong> </p>
+                  <p id="email_val"><strong>Email:</strong> </p>
+                  <p id="phone_val"><strong>Phone:</strong> </p>
+                  <p id="bio_val"><strong>Bio:</strong></p>
               </div>
+
+                <!-- <div class="badges-section">
+                  <h2>Badges</h2>
+                  
+                </div> -->
+                <a href="editprofile.html" class="edit-profile-button">Edit Profile</a>
+
             </div>
         </div>
         <div class="profile-right-container">
             <div class="profile-right">
+              <div class="profile-right-top">
                 <div class="event-history">
-                    <h2>Event Participation History</h2>
-                    <ul>
-                        <!-- <li>Event 1</li>
-                        <li>Event 2</li>
-                        <li>Event 3</li> -->
-                    </ul>
+                    <h2>Registered Events</h2>
+                    <div id="registered_events">
+
+                    </div>
                 </div>
-                <!-- Add more sections for upcoming events, skills, achievements, etc. -->
-                <div class="certificates-section">
-                  <h2>Certificates</h2>
-                  <!-- Add certificates here -->
               </div>
-              
+                <!-- <div class="certificates-section">
+                  <h2>Certificates</h2>
+                  
+                </div> -->
+              <div class="profile-right-bottom"></div>
+                <div class="events-hosted">
+                  <h2>Hosted Events</h2>
+                  <div id="hosted_events">
+
+                  </div>
+               </div>
+              </div>
             </div>
         </div>
-        <a href="editprofile.html" class="edit-profile-button">Edit Profile</a>
-
+        
         
 
     </div>
 </body>
 <script src="https://kit.fontawesome.com/fbb35875de.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script type="module">
+  // Import necessary Firebase modules
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, collection, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyA1NgEx9i0gCwGvA97ouWZWQBkwuiAsrm0",
+    authDomain: "cleanup-connect-ebaae.firebaseapp.com",
+    projectId: "cleanup-connect-ebaae",
+    storageBucket: "cleanup-connect-ebaae.appspot.com",
+    messagingSenderId: "206124027034",
+    appId: "1:206124027034:web:423e5574fce9877e562323"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  
+  // Define the viewEventDetails function in the global scope
+  function viewEventDetails(eid) {
+    // Redirect to the event details page with the event ID as a parameter
+    window.location.href = `../Display Event/index.html?id=${eid}`;
+  }
+
+  document.addEventListener('DOMContentLoaded', async function () {
+      // Get user email from localStorage
+      const userEmail = localStorage.getItem('userEmail');
+
+      // Reference to the user document
+      const userDocRef = doc(db, 'Users', userEmail);
+
+      try {
+          // Get user document
+          const userDocSnapshot = await getDoc(userDocRef);
+          
+          if (userDocSnapshot.exists()) {
+              const userData = userDocSnapshot.data();
+              // Update profile info with user data
+              document.getElementById('user_val').innerText = userData.username || '';
+              document.getElementById('location_val').innerText = userData.city || '';
+              document.getElementById('email_val').innerText = userData.email || '';
+              document.getElementById('phone_val').innerText = userData.phone || '';
+              document.getElementById('bio_val').innerText = userData.bio || '';
+
+              // Get registered events
+              const registeredEvents = userData.eventsAttending || [];
+              const registeredEventsContainer = document.getElementById('registered_events');
+
+              console.log(registeredEvents);
+
+              if (registeredEvents.length > 0) {
+
+                  let i=0;
+                  registeredEventsContainer.innerHTML = '<ul>';
+                  registeredEvents.forEach(async (e) => {
+                    console.log(userEmail);
+                    console.log(12121);
+
+                      const eventDocRef = doc(db, 'Users', userEmail);
+                      const eventDocSnapshot = await getDoc(eventDocRef);
+                      if (eventDocSnapshot.exists()) {
+                          const eventData = eventDocSnapshot.data();
+                          const eventTitle = eventData.eventsAttending[i];
+                          const organizer = eventData.mail_organizers[i];
+                          const eid=eventData.event_ids[i];
+                          const card = document.createElement('div');
+                          card.classList.add('card');
+                          card.style.marginBottom = '20px'; // Add margin bottom to create space between cards
+
+                          card.innerHTML = `
+                              <div class="card-body">
+                                  <h5 class="card-title">${eventTitle}</h5>
+                                  <h6 class="card-subtitle mb-2 text-muted">Organizer: ${organizer}</h6>
+                                  <button class="btn btn-primary view-details-btn" data-id="${eid}">View Details</button>
+                              </div>
+                          `;
+                          registeredEventsContainer.appendChild(card);
+                          i++;
+                      }
+                  });
+                  registeredEventsContainer.innerHTML += '</ul>';
+              } else {
+                  registeredEventsContainer.innerHTML = '<p>No registered events</p>';
+              }
+          } else {
+              console.log('User document not found');
+          }
+      } catch (error) {
+          console.error('Error fetching user details:', error);
+      }
+  });
+
+  // Add event listener to the container for event delegation
+  document.getElementById('registered_events').addEventListener('click', function(event) {
+    if(event.target.classList.contains('view-details-btn')) {
+      // Retrieve the event ID from the data-id attribute
+      const eid = event.target.dataset.id;
+      // Redirect to the event details page with the event ID as a parameter
+      viewEventDetails(eid);
+    }
+  });
+</script>
+
 </html>
