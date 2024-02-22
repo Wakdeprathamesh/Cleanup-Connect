@@ -13,11 +13,11 @@
          </div>
          <form action="#">
             <div class="field">
-               <input type="text" required>
+               <input type="text" required id="email_val">
                <label>Email Address</label>
             </div>
             <div class="field">
-               <input type="password" required>
+               <input type="password" required id="password_val">
                <label>Password</label>
             </div>
             <div class="content">
@@ -30,7 +30,7 @@
                </div>
             </div>
             <div class="field">
-               <input type="submit" value="Login">
+               <input type="submit" value="Login" id="login">
             </div>
             <div class="signup-link">
                Not a member? <a href="../Signup/index.html">Signup now</a>
@@ -38,4 +38,51 @@
          </form>
       </div>
    </body>
+
+   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+
+   <script type="module">
+      // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase , set , ref , update} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getAuth, createUserWithEmailAndPassword , signInWithEmailAndPassword  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  // Initialize Firebase
+  const firebaseConfig = {
+      apiKey: "AIzaSyA1NgEx9i0gCwGvA97ouWZWQBkwuiAsrm0",
+    authDomain: "cleanup-connect-ebaae.firebaseapp.com",
+    databaseURL: "https://cleanup-connect-ebaae-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "cleanup-connect-ebaae",
+    storageBucket: "cleanup-connect-ebaae.appspot.com",
+    messagingSenderId: "206124027034",
+    appId: "1:206124027034:web:423e5574fce9877e562323"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+      const auth = getAuth();
+
+      login.addEventListener('click',(e)=>{
+   e.preventDefault();
+
+   let email = document.getElementById("email_val").value;
+   let password = document.getElementById("password_val").value;
+
+   localStorage.setItem('userEmail', email);
+  signInWithEmailAndPassword(auth, email, password)
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    // ...
+    console.log(12121);
+})
+});
+
+ 
+   </script>
 </html>
