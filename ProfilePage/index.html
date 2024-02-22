@@ -179,6 +179,49 @@
               } else {
                   registeredEventsContainer.innerHTML = '<p>No registered events</p>';
               }
+
+
+              const HostedEvents = userData.events || [];
+              const HostedEventsContainer = document.getElementById('hosted_events');
+
+              //Events Hosted
+
+              if (HostedEvents.length > 0) {
+
+              let i=0;
+              HostedEventsContainer.innerHTML = '<ul>';
+              HostedEvents.forEach(async (e) => {
+                console.log(userEmail);
+                console.log(12121);
+
+                  const eventDocRef = doc(db, 'Users', userEmail);
+                  const eventDocSnapshot = await getDoc(eventDocRef);
+                  if (eventDocSnapshot.exists()) {
+                      const eventData = eventDocSnapshot.data();
+                      const eventTitle = eventData.eventTitles[i];
+                      const eid=eventData.events[i];
+                      const card = document.createElement('div');
+                      card.classList.add('card');
+                      card.style.marginBottom = '20px'; // Add margin bottom to create space between cards
+
+                      card.innerHTML = `
+                          <div class="card-body">
+                              <h5 class="card-title">${eventTitle}</h5>
+                              <button class="btn btn-primary view-details-btn" data-id="${eid}">View Details</button>
+                          </div>
+                      `;
+                      HostedEventsContainer.appendChild(card);
+                      i++;
+                  }
+              });
+            HostedEventsContainer.innerHTML += '</ul>';
+          } else {
+          HostedEventsContainer.innerHTML = '<p>No hosted events</p>';
+        }
+
+
+
+
           } else {
               console.log('User document not found');
           }
@@ -189,6 +232,14 @@
 
   // Add event listener to the container for event delegation
   document.getElementById('registered_events').addEventListener('click', function(event) {
+    if(event.target.classList.contains('view-details-btn')) {
+      // Retrieve the event ID from the data-id attribute
+      const eid = event.target.dataset.id;
+      // Redirect to the event details page with the event ID as a parameter
+      viewEventDetails(eid);
+    }
+  });
+  document.getElementById('hosted_events').addEventListener('click', function(event) {
     if(event.target.classList.contains('view-details-btn')) {
       // Retrieve the event ID from the data-id attribute
       const eid = event.target.dataset.id;
