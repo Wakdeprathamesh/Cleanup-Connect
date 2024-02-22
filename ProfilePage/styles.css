@@ -17,7 +17,7 @@ html, body {
 
 .profile-right-container {
     flex: 3; /* Takes up 3/4 of the page */
-   /* border: 1px solid #ccc; /* Border around right section */
+   border: 1px solid #ccc; 
 }
 
 .profile-left {
@@ -60,7 +60,7 @@ ul li {
 
   /* Hover effect */
   .button-link:hover {
-    background-color: #0056b3; /* Change background color on hover */
+    background-color: grey; /* Change background color on hover */
   }
   .profile-image-container {
     position: relative;
@@ -118,7 +118,7 @@ ul li {
     height: 40px;
     margin-top: 10px; /* Add margin to separate from the login button */
     padding: 10px 20px; /* Adjust padding as needed */
-    background-color: #0056b3; /* Button background color */
+    background-color: black; /* Button background color */
     color: #fff; /* Button text color */
     text-decoration: none; /* Remove underline */
     border: none; /* Remove border */
@@ -131,4 +131,11 @@ ul li {
 /* Hover effect */
 .edit-profile-button:hover {
     background-color: #004080; /* Change background color on hover */
+}
+
+.profile-right-bottom{
+    margin-top: 100px;
+}
+.registered_events{
+
 }
