@@ -13,6 +13,8 @@
   <div class="container mt-5">
     <h2>Event Details</h2>
     <div id="eventDetails"></div>
+    <!--RSVP-->
+    <button class="rsvp btn btn-primary mt-3" id="rsvp_btn" >RSVP</button>
     <!-- Feedback button -->
     <a href="feedback.html" class="btn btn-primary mt-3">Give Feedback</a>
   </div>
@@ -32,11 +34,9 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { doc, getDoc , addDoc  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { doc, getDoc , addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  document.addEventListener("DOMContentLoaded", function() {
-    // Initialize Firebase
-    const firebaseConfig = {
+  const firebaseConfig = {
       apiKey: "AIzaSyA1NgEx9i0gCwGvA97ouWZWQBkwuiAsrm0",
     authDomain: "cleanup-connect-ebaae.firebaseapp.com",
     databaseURL: "https://cleanup-connect-ebaae-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -48,6 +48,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
     
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+
+
+    let title,o_emails;
+  document.addEventListener("DOMContentLoaded", function() {
+    // Initialize Firebase
+   
   
     // Get the event ID from the URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -55,12 +61,17 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
   
     // Reference to the event document
     const eventRef = db.collection("Events").doc(eventId);
+
+    
   
     // Get the event details
     eventRef.get().then((doc) => {
       if (doc.exists) {
         const eventData = doc.data();
         const eventDetails = document.getElementById("eventDetails");
+
+        title=eventData.eventTitle;
+        o_emails=eventData.organizerEmail;
         
         console.log(eventData.eventTitle,eventData.eventDescription,eventData.eventDate,eventData.eventTime,eventData.eventLocation,eventData.organizerEmail)
         // Create HTML to display event details
@@ -87,5 +98,89 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
       console.log("Error getting document:", error);
     });
   });
+   
+//   // let count;
+//   const userEmail = localStorage.getItem('userEmail');
+//   console.log(userEmail)
+
+//   rsvp_btn.addEventListener('click', (e) => {
+//     const userDocRef = doc(db, 'Users', userEmail);
+
+//     getDoc(userDocRef)
+//         .then((docSnapshot) => {
+//             if (docSnapshot.exists()) {
+//                 const userData = docSnapshot.data();
+//                 count = userData.count;
+
+//                 // Update form fields with retrieved data
+
+//                 // db.collection("Users").doc(userEmail).set({
+//                 //     [`eventTitle${count}`]: eventData.eventTitle,
+//                 //     [`eventOrganizer${count}`]: eventData.organizerEmail
+//                 // })
+//                     // .then(() => {
+//                     //     console.log("Document successfully updated!");
+//                     // })
+//                     // .catch((error) => {
+//                     //     console.error("Error updating document: ", error);
+//                     // });
+//             } else {
+//                 console.log('No such document!');
+//             }
+//         })
+//         .catch((error) => {
+//             console.error('Error getting user details: ', error);
+//         });
+// })
+const rsvpButton = document.getElementById('rsvp_btn');
+
+rsvpButton.addEventListener('click', () => {
+  // Get the user's email from localStorage
+  const userEmail = localStorage.getItem('userEmail');
+  
+  // Get the event ID from the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventId = urlParams.get('id');
+
+  // Reference to the event document
+  const eventRef = db.collection("Events").doc(eventId);
+
+  // Reference to the user document
+  const userRef = db.collection("Users").doc(userEmail);
+
+  // Get the event details
+  eventRef.get().then((eventDoc) => {
+    if (eventDoc.exists) {
+      const eventData = eventDoc.data();
+      
+      // Update the event document with user's information
+      eventRef.update({
+        participants: firebase.firestore.FieldValue.arrayUnion(userEmail),
+      }).then(() => {
+        console.log("Event document updated with user's RSVP");
+        
+        // Update the user document with event information
+        userRef.update({
+          eventsAttending: firebase.firestore.FieldValue.arrayUnion(title),
+          mail_organizers: firebase.firestore.FieldValue.arrayUnion(o_emails),
+          event_ids: firebase.firestore.FieldValue.arrayUnion(eventId)
+        }).then(() => {
+          console.log("User document updated with event information");
+          alert("RSVP successful!");
+        }).catch((error) => {
+          console.error("Error updating user document: ", error);
+        });
+      }).catch((error) => {
+        console.error("Error updating event document: ", error);
+      });
+    } else {
+      console.log("No such document!");
+    }
+  }).catch((error) => {
+    console.error("Error getting event document: ", error);
+  });
+});
+
 </script>
+
 </html>
